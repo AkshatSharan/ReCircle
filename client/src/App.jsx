@@ -13,6 +13,7 @@ import RecycleScannerPage from './pages/RecycleScannerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import MapPage from './pages/MapPage';
 import ChatbotPage from './pages/ChatbotPage';
+import AddItemPage from './pages/AddItemPage';
 
 // Create a separate component for the router content
 function AppRoutes() {
@@ -24,6 +25,7 @@ function AppRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/add-item" element={<AddItemPage />} />
 
           {/* Protected Routes */}
           <Route

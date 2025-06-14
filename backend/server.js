@@ -1,19 +1,22 @@
+import 'dotenv/config';
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
-import userRoutes from './routes/userRoutes.js';
 
-dotenv.config();
+import connectDB from './config/db.js';
+import itemRoutes from './routes/itemRoutes.js';
+
 const app = express();
+const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/api/users', userRoutes);
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected');
-    app.listen(5000, () => console.log('Server running on port 5000'));
-  })
-  .catch(err => console.error(err));
+// Connect DB before server starts
+connectDB();
+
+app.use('/api/items', itemRoutes);
+
+app.get('/', (req, res) => res.send('ReCircle API running!'));
+
+app.listen(PORT, () => console.log(`🚀 Server started on port ${PORT}`));

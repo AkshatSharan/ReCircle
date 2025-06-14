@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import GreenScoreCard from '../components/common/GreenScoreCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import AddItemPage from './AddItemPage';
 
 const DashboardPage = () => {
   const { currentUser, loading, logout } = useAuth();
@@ -39,9 +40,8 @@ const DashboardPage = () => {
       title: "Add Item",
       description: "Post a reusable item for donation",
       icon: <PlusCircle className="text-green-600" size={24} />,
-      onClick: () => {
-        // Navigation or modal trigger for adding item
-      }
+     
+        onClick: () => navigate('/add-item')
     },
     {
       title: "Scan Item",
