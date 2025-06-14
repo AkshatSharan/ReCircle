@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Recycle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Recycle, Phone } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { login, signInWithGoogle, signInWithFacebook } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,14 +31,61 @@ const LoginPage = () => {
       return;
     }
 
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      // In a real app, you'd validate credentials here
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userEmail', formData.email);
+    try {
+      await login(formData.email, formData.password);
       navigate('/dashboard');
-    }, 1500);
+    } catch (error) {
+      const firebaseErrors = {};
+      switch (error.code) {
+        case 'auth/user-not-found':
+          firebaseErrors.email = 'No account found with this email';
+          break;
+        case 'auth/wrong-password':
+          firebaseErrors.password = 'Incorrect password';
+          break;
+        case 'auth/invalid-email':
+          firebaseErrors.email = 'Invalid email address';
+          break;
+        case 'auth/user-disabled':
+          firebaseErrors.general = 'This account has been disabled';
+          break;
+        case 'auth/too-many-requests':
+          firebaseErrors.general = 'Too many failed attempts. Please try again later.';
+          break;
+        case 'auth/invalid-credential':
+          firebaseErrors.general = 'Invalid email or password';
+          break;
+        default:
+          firebaseErrors.general = 'Failed to sign in. Please try again.';
+      }
+      setErrors(firebaseErrors);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+      navigate('/dashboard');
+    } catch (error) {
+      setErrors({ general: 'Failed to sign in with Google. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithFacebook();
+      navigate('/dashboard');
+    } catch (error) {
+      setErrors({ general: 'Failed to sign in with Facebook. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,6 +101,12 @@ const LoginPage = () => {
         </div>
 
         <Card>
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errors.general}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -67,6 +122,7 @@ const LoginPage = () => {
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
                   placeholder="Enter your email"
+                  disabled={isLoading}
                 />
               </div>
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -86,11 +142,13 @@ const LoginPage = () => {
                   className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
                     }`}
                   placeholder="Enter your password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -99,10 +157,6 @@ const LoginPage = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
-              </label>
               <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-700">
                 Forgot password?
               </Link>
@@ -133,7 +187,13 @@ const LoginPage = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                type="button"
+              >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -142,7 +202,13 @@ const LoginPage = () => {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleFacebookSignIn}
+                disabled={isLoading}
+                type="button"
+              >
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>

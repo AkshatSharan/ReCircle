@@ -3,8 +3,37 @@ import { PlusCircle, Camera, MapPin, BarChart2, Award, RefreshCw, Leaf } from 'l
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import GreenScoreCard from '../components/common/GreenScoreCard';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-const DashboardPage = ({ currentUser }) => {
+const DashboardPage = () => {
+  const { currentUser, loading, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Show loading state while user data is being fetched
+  console.log(currentUser)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Guard against undefined currentUser
+  if (!currentUser) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-5xl">
+        <div className="text-center">
+          <p className="text-gray-600">Unable to load user data. Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+
   const quickActions = [
     {
       title: "Add Item",
@@ -57,17 +86,29 @@ const DashboardPage = ({ currentUser }) => {
     }
   ];
 
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
+      <button onClick={handleSignOut}>Logout Test</button>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome, {currentUser.name} 🌿</h1>
-        <p className="text-gray-600">Here’s your eco-impact dashboard</p>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Welcome, {currentUser?.displayName || currentUser?.email || 'User'} 🌿
+        </h1>
+        <p className="text-gray-600">Here's your eco-impact dashboard</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="md:col-span-2">
           <GreenScoreCard
-            score={currentUser.greenScore}
+            score={currentUser?.greenScore || 0}
             monthlyChange={150}
             rank={42}
           />

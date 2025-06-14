@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, Recycle, MapPin } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { useAuth } from '../contexts/AuthContext';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { signup, updateUserProfile } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,19 +43,39 @@ const RegisterPage = () => {
       return;
     }
 
-    setTimeout(() => {
-      setIsLoading(false);
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userEmail', formData.email);
-      localStorage.setItem('userName', `${formData.firstName} ${formData.lastName}`);
+    try {
+      await signup(formData.email, formData.password);
+      await updateUserProfile(`${formData.firstName} ${formData.lastName}`);
+
+      // Store additional user data in localStorage or Firestore
+      localStorage.setItem('userLocation', formData.location);
+
       navigate('/dashboard');
-    }, 2000);
+    } catch (error) {
+      const firebaseErrors = {};
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          firebaseErrors.email = 'Email address is already in use';
+          break;
+        case 'auth/invalid-email':
+          firebaseErrors.email = 'Invalid email address';
+          break;
+        case 'auth/weak-password':
+          firebaseErrors.password = 'Password is too weak';
+          break;
+        default:
+          firebaseErrors.general = 'Failed to create account. Please try again.';
+      }
+      setErrors(firebaseErrors);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Rest of your JSX remains the same, just add error display for general errors
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Recycle className="text-green-600 mr-2" size={40} />
@@ -63,6 +85,12 @@ const RegisterPage = () => {
         </div>
 
         <Card>
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errors.general}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
