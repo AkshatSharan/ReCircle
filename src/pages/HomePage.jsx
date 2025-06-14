@@ -30,19 +30,37 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+      <header className="bg-white shadow-sm p-3">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
+            {/* Logo Section */}
             <div className="flex items-center">
-              <Recycle className="text-green-600 mr-2" size={32} />
-              <span className="text-2xl font-bold text-gray-900">ReCircle</span>
+              <Recycle className="text-green-600 mr-2" size={24} />
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">
+                ReCircle
+              </span>
             </div>
-            <div className="space-x-4">
+
+            {/* Navigation Buttons */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link to="/login">
-                <Button variant="outline" size="sm">Sign In</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs sm:text-sm px-3 py-2 sm:px-4"
+                >
+                  <span className="hidden sm:inline">Sign In</span>
+                  <span className="sm:hidden">Login</span>
+                </Button>
               </Link>
               <Link to="/register">
-                <Button size="sm">Get Started</Button>
+                <Button
+                  size="sm"
+                  className="text-xs sm:text-sm px-3 py-2 sm:px-4"
+                >
+                  <span className="hidden sm:inline">Get Started</span>
+                  <span className="sm:hidden">Join</span>
+                </Button>
               </Link>
             </div>
           </div>
