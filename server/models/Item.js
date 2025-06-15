@@ -16,6 +16,18 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Reference back to the User who added this item
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['available', 'claimed', 'donated'],
+    default: 'available',
+  },
+}, {
+  timestamps: true // Adds createdAt and updatedAt automatically
 });
 
 const Item = mongoose.model('Item', itemSchema);

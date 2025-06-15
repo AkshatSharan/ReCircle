@@ -3,7 +3,14 @@ import User from '../models/User.js';
 // ✔ REGISTER USER
 export const registerUser = async (req, res) => {
   try {
+    console.log('Register endpoint hit with data:', req.body);
+
     const { uid, name, email } = req.body;
+
+    const existingUser = await User.findOne({ $or: [{ uid }, { email }] });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
 
     const user = new User({
       uid,
@@ -17,13 +24,18 @@ export const registerUser = async (req, res) => {
           points: 30,
         },
       ],
+      items: [],
     });
 
-    console.log("Creating user:", user);
+    const savedUser = await user.save();
+    console.log("User saved to MongoDB:", savedUser);
 
-    await user.save();
-    res.status(201).json({ message: 'User registered', user });
+    res.status(201).json({
+      message: 'User registered successfully',
+      user: savedUser
+    });
   } catch (err) {
+    console.error('Registration error:', err);
     res.status(500).json({ error: err.message });
   }
 };
