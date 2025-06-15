@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { ImageIcon, X } from 'lucide-react';
+import { addItem } from '../api/apiCalls';
+import { useAuth } from '../contexts/AuthContext';
 
 const AddItemPage = () => {
   const [title, setTitle] = useState('');
@@ -9,6 +10,7 @@ const AddItemPage = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -29,10 +31,11 @@ const AddItemPage = () => {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-    formData.append('image', image); // 🔑 Key must match backend
+    formData.append('image', image);
+    formData.append('uid', currentUser.uid);
 
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/items/add`, formData);
+      await addItem(formData);
       alert('Item added successfully!');
       navigate('/dashboard');
     } catch (err) {

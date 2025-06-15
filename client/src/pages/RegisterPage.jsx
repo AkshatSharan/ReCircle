@@ -4,11 +4,12 @@ import { Mail, Lock, User, Eye, EyeOff, Recycle, MapPin } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
+import { register } from '../api/apiCalls';
+import { getAuth } from 'firebase/auth';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -28,8 +29,7 @@ const RegisterPage = () => {
     setErrors({});
 
     const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
+    if (!formData.name) newErrors.name = 'First name is required';
     if (!formData.email) newErrors.email = 'Email is required';
     if (!formData.password) newErrors.password = 'Password is required';
     if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
@@ -44,12 +44,31 @@ const RegisterPage = () => {
     }
 
     try {
+      // firebase signup
       await signup(formData.email, formData.password);
-      await updateUserProfile(`${formData.firstName} ${formData.lastName}`);
+      await updateUserProfile(`${formData.name}`);
 
       // Store additional user data in localStorage or Firestore
       localStorage.setItem('userLocation', formData.location);
 
+      // transfer the data to mongodb
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      const uid = currentUser.uid;
+
+      console.log("user created")
+
+      const userPayload = {
+        uid,
+        name: formData.name,
+        email: formData.email,
+      };
+
+      console.log("user copied")
+
+      await register(userPayload);
+
+      console.log("user pasted")
       navigate('/dashboard');
     } catch (error) {
       const firebaseErrors = {};
@@ -92,41 +111,23 @@ const RegisterPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.firstName ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    placeholder="First name"
-                  />
-                </div>
-                {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
-                </label>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                First Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
                     }`}
-                  placeholder="Last name"
+                  placeholder="First name"
                 />
-                {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
               </div>
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
