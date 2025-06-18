@@ -14,6 +14,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import ChatbotPage from './pages/ChatbotPage';
 import AddItemPage from './pages/AddItemPage';
 import OSMMap from './components/OSMMap';
+import ScanItemPage from './pages/ScanItemPage';
 
 // Create a separate component for the router content
 function AppRoutes() {
@@ -84,6 +85,17 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/scan-item"
+            element={
+              <ProtectedRoute>
+                <ScanItemPage />
+              </ProtectedRoute>
+            }
+          />
+
+
         </Routes>
       </Layout>
     </Router>

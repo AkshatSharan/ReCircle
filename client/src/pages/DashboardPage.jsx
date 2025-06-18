@@ -24,9 +24,7 @@ const DashboardPage = () => {
       title: "Scan Item",
       description: "Check recyclability of items",
       icon: <Camera className="text-blue-600" size={24} />,
-      onClick: () => {
-        // Add scan logic here
-      }
+       onClick: () => navigate('/scan-item')
     },
     {
       title: "Find Centers",
