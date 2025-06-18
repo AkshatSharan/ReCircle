@@ -11,9 +11,9 @@ import DashboardPage from './pages/DashboardPage';
 import ReuseMatchingPage from './pages/ReuseMatchingPage';
 import RecycleScannerPage from './pages/RecycleScannerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
-import MapPage from './pages/MapPage';
 import ChatbotPage from './pages/ChatbotPage';
 import AddItemPage from './pages/AddItemPage';
+import OSMMap from './components/OSMMap';
 
 // Create a separate component for the router content
 function AppRoutes() {
@@ -72,7 +72,7 @@ function AppRoutes() {
             path="/map"
             element={
               <ProtectedRoute>
-                <MapPage />
+              <OSMMap/>
               </ProtectedRoute>
             }
           />

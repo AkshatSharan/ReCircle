@@ -1,70 +1,45 @@
-import React from 'react';
-import { PlusCircle, Camera, MapPin, BarChart2, Award, RefreshCw, Leaf } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { PlusCircle, Camera, MapPin, BarChart2, Award, RefreshCw } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import GreenScoreCard from '../components/common/GreenScoreCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import AddItemPage from './AddItemPage';
 
 const DashboardPage = () => {
   const { currentUser, loading, logout } = useAuth();
   const navigate = useNavigate();
 
-  //loading state while user data is fetched
-  console.log(currentUser)
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Guard against undefined currentUser
-  if (!currentUser) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-5xl">
-        <div className="text-center">
-          <p className="text-gray-600">Unable to load user data. Please try refreshing the page.</p>
-        </div>
-      </div>
-    );
-  }
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
 
   const quickActions = [
     {
       title: "Add Item",
       description: "Post a reusable item for donation",
       icon: <PlusCircle className="text-green-600" size={24} />,
-     
-        onClick: () => navigate('/add-item')
+      onClick: () => navigate('/add-item')
     },
     {
       title: "Scan Item",
       description: "Check recyclability of items",
       icon: <Camera className="text-blue-600" size={24} />,
       onClick: () => {
-        // Open camera or scanner
+        // Add scan logic here
       }
     },
     {
       title: "Find Centers",
       description: "Locate recycling & donation centers",
       icon: <MapPin className="text-yellow-600" size={24} />,
-      onClick: () => {
-        // Navigate to center locator
-      }
+      onClick: () => setShowLocationModal(true)
     },
     {
       title: "View Stats",
       description: "Track your sustainability journey",
       icon: <BarChart2 className="text-purple-600" size={24} />,
       onClick: () => {
-        // Navigate to stats dashboard
+        // Navigate to stats
       }
     }
   ];
@@ -95,9 +70,31 @@ const DashboardPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-5xl">
+        <div className="text-center">
+          <p className="text-gray-600">Unable to load user data. Please try refreshing the page.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
       <button onClick={handleSignOut}>Logout Test</button>
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">
           Welcome, {currentUser?.displayName || currentUser?.email || 'User'} 🌿
@@ -176,6 +173,41 @@ const DashboardPage = () => {
           </div>
         </Card>
       </div>
+
+      {/* Location Modal */}
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Enter your location</h2>
+            <input
+              type="text"
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
+              placeholder="e.g. Ranchi, Jharkhand"
+              className="w-full border px-3 py-2 rounded mb-4"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                onClick={() => setShowLocationModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                onClick={() => {
+                  if (locationInput.trim()) {
+                    navigate(`/map?location=${encodeURIComponent(locationInput)}`);
+                    setShowLocationModal(false);
+                  }
+                }}
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
