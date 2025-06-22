@@ -1,3 +1,6 @@
+// 📁 /client
+
+// --- App.jsx ---
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -15,8 +18,8 @@ import ChatbotPage from './pages/ChatbotPage';
 import AddItemPage from './pages/AddItemPage';
 import OSMMap from './components/OSMMap';
 import ScanItemPage from './pages/ScanItemPage';
+import SwipePage from './pages/SwipePage';
 
-// Create a separate component for the router content
 function AppRoutes() {
   return (
     <Router>
@@ -29,80 +32,74 @@ function AppRoutes() {
           <Route path="/add-item" element={<AddItemPage />} />
 
           {/* Protected Routes */}
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reuse"
-            element={
-              <ProtectedRoute>
-                <ReuseMatchingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/scanner"
-            element={
-              <ProtectedRoute>
-                <RecycleScannerPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/leaderboard"
-            element={
-              <ProtectedRoute>
-                <LeaderboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/map"
-            element={
-              <ProtectedRoute>
-              <OSMMap/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <ProtectedRoute>
-                <ChatbotPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/scan-item"
-            element={
-              <ProtectedRoute>
-                <ScanItemPage />
-              </ProtectedRoute>
-            }
-          />
-
-
+          <Route 
+          path="/profile" 
+          element={
+          <ProtectedRoute>
+            <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/dashboard" 
+          element={
+          <ProtectedRoute>
+            <DashboardPage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/reuse" 
+          element={
+          <ProtectedRoute>
+            <ReuseMatchingPage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/scanner" 
+          element={
+          <ProtectedRoute>
+            <RecycleScannerPage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/leaderboard" 
+          element={
+          <ProtectedRoute>
+            <LeaderboardPage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/map" 
+          element={<ProtectedRoute>
+            <OSMMap />
+          </ProtectedRoute>
+        } />
+          <Route 
+          path="/chat" 
+          element={
+          <ProtectedRoute>
+            <ChatbotPage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/scan-item" 
+          element={
+          <ProtectedRoute>
+            <ScanItemPage />
+            </ProtectedRoute>
+          } />
+          <Route 
+          path="/swipe" 
+          element={
+          <ProtectedRoute>
+            <SwipePage fetchFromBackend={true} />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Layout>
     </Router>
   );
 }
 
-// Main App component that provides the auth context
 function App() {
   return (
     <AuthProvider>

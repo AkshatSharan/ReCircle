@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { PlusCircle, Camera, MapPin, BarChart2, Award, RefreshCw } from 'lucide-react';
+import { PlusCircle, Camera, MapPin, BarChart2, Award, RefreshCw, RecycleIcon } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import GreenScoreCard from '../components/common/GreenScoreCard';
@@ -33,12 +33,10 @@ const DashboardPage = () => {
       onClick: () => setShowLocationModal(true)
     },
     {
-      title: "View Stats",
-      description: "Track your sustainability journey",
-      icon: <BarChart2 className="text-purple-600" size={24} />,
-      onClick: () => {
-        // Navigate to stats
-      }
+      title: "SwipeCycle",
+      description: "Browse community-shared items and match with what you love.",
+      icon: <RecycleIcon className="text-purple-600" size={24} />,
+      onClick: () => navigate('/swipe')
     }
   ];
 

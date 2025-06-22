@@ -9,6 +9,8 @@ const AddItemPage = () => {
   const [description, setDescription] = useState('');
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [status, setStatus] = useState('available');
+
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
@@ -33,6 +35,7 @@ const AddItemPage = () => {
     formData.append('description', description);
     formData.append('image', image);
     formData.append('uid', currentUser.uid);
+    formData.append('status', status);
 
     try {
       await addItem(formData);
@@ -72,6 +75,21 @@ const AddItemPage = () => {
             required
           ></textarea>
         </div>
+
+        <div>
+  <label className="block text-sm font-medium mb-1 text-gray-700">Item Status</label>
+  <select
+    className="w-full border px-3 py-2 rounded-md focus:ring-2 focus:ring-green-500 outline-none"
+    value={status}
+    onChange={(e) => setStatus(e.target.value)}
+    required
+  >
+    <option value="available">Available</option>
+    <option value="claimed">Claimed</option>
+    <option value="donated">Donated</option>
+  </select>
+</div>
+
 
         <div>
           <label className="block text-sm font-medium mb-2 text-gray-700">Upload Image</label>

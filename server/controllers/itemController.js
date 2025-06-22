@@ -83,12 +83,11 @@ export const getUserItems = async (req, res) => {
 export const getAllItems = async (req, res) => {
   try {
     const items = await Item.find({ status: 'available' })
-      .populate('addedBy', 'name email') // Populate user details
+      .populate('addedBy', 'name email')
       .sort({ createdAt: -1 });
 
     res.json({ items });
   } catch (error) {
-    console.error('Get all items error:', error);
     res.status(500).json({ message: error.message });
   }
 };
