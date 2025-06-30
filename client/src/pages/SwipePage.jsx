@@ -6,12 +6,14 @@ import SwipeCard from '../components/SwipeCard';
 import SwipeActions from '../components/SwipeActions';
 import SwipeStats from '../components/SwipeStats';
 import { ArrowLeft, Sparkles } from 'lucide-react';
+import { getAuth } from 'firebase/auth'; // Firebase Auth
 
 const SwipePage = () => {
   const [items, setItems] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeActions, setSwipeActions] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null); // ✅
 
   const currentIndexRef = useRef(currentIndex);
   const childRefs = useMemo(
@@ -20,6 +22,12 @@ const SwipePage = () => {
   );
 
   useEffect(() => {
+    // ✅ Get current user ID from Firebase
+    const auth = getAuth();
+    const user = auth.currentUser;
+    setCurrentUserId(user?.uid || null);
+
+    // Fetch items from backend
     const fetchItems = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/items');
@@ -39,6 +47,26 @@ const SwipePage = () => {
 
   const canGoBack = currentIndex < items.length - 1;
   const canSwipe = currentIndex >= 0;
+
+  // 🔔 Send like notification to backend
+const handleRightSwipe = async (itemId) => {
+  try {
+    const auth = getAuth(); // in case it's needed
+    const user = auth.currentUser;
+    const token = await user.getIdToken();
+
+    await axios.post(`http://localhost:5000/api/items/${itemId}/like`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('✅ Like notification sent');
+  } catch (error) {
+    console.error('❌ Swipe like failed:', error);
+  }
+};
+
 
   const swiped = (direction, item, index) => {
     setSwipeActions((prev) => [
@@ -93,7 +121,7 @@ const SwipePage = () => {
 
         <SwipeStats {...stats} />
 
-        <div className="relative h-[600px] mb-8">
+        <div className="relative h-[480px] mb-4">
           {items.map((item, index) => (
             <TinderCard
               ref={childRefs[index]}
@@ -105,6 +133,7 @@ const SwipePage = () => {
             >
               <SwipeCard
                 item={item}
+                currentUserId={currentUserId} // ✅ Pass here
                 className="w-full h-full cursor-grab active:cursor-grabbing"
                 style={{
                   zIndex: items.length - index,
@@ -135,7 +164,6 @@ const SwipePage = () => {
               </div>
             </div>
           )}
-
         </div>
 
         <SwipeActions

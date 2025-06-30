@@ -3,17 +3,17 @@ import React, { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const SwipeCard = ({ item, style, className }) => {
+const SwipeCard = ({ item, currentUserId, style, className }) => {
   const [imageError, setImageError] = useState(false);
+
+  // 🔥 Skip rendering if it's the user's own item
+  if (!item || item?.user?.id === currentUserId) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`bg-white rounded-xl shadow-md overflow-hidden max-w-sm mx-auto border border-gray-100 ${className}`}
-      style={{ ...style, width: '100%', maxWidth: '320px' }}
+      whileHover={{ scale: 1.02 }}
+      className={`bg-white rounded-2xl shadow-lg border border-gray-200 transition-transform duration-300 ${className}`}
+      style={{ ...style, width: '100%', maxWidth: '400px', maxHeight: '500px' }}
     >
       {/* Image with badge */}
       <div className="relative">
@@ -24,7 +24,7 @@ const SwipeCard = ({ item, style, className }) => {
               : item?.imageUrl
           }
           alt={item?.title}
-          className="w-full h-44 object-cover"
+          className="w-full h-64 object-cover"
           onError={() => setImageError(true)}
         />
         <span className="absolute top-2 right-2 px-3 py-1 bg-lime-100 text-lime-800 text-xs font-semibold rounded-full shadow-sm">
@@ -41,7 +41,6 @@ const SwipeCard = ({ item, style, className }) => {
           {item?.description || 'No description provided.'}
         </p>
 
-        {/* Category + Location */}
         <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
           {item?.category && (
             <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">
@@ -56,26 +55,16 @@ const SwipeCard = ({ item, style, className }) => {
           )}
         </div>
 
-        {/* Donor and Like/Pass */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img
-              src={item?.user?.avatar || 'https://api.dicebear.com/7.x/thumbs/svg?seed=donor'}
-              alt="avatar"
-              className="w-8 h-8 rounded-full"
-            />
-            <div className="text-sm">
-              <p className="text-gray-900 font-medium">{item?.user?.name || 'Unknown'}</p>
-              <p className="text-gray-500 text-xs">⭐ {item?.user?.points || 0} pts</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button className="bg-gray-100 hover:bg-gray-200 px-4 py-1 text-sm rounded-md text-gray-800">
-              Pass
-            </button>
-            <button className="bg-green-600 hover:bg-green-700 px-4 py-1 text-sm rounded-md text-white">
-              Like
-            </button>
+        {/* Donor info */}
+        <div className="mt-4 flex items-center space-x-2">
+          <img
+            src={item?.user?.avatar || 'https://api.dicebear.com/7.x/thumbs/svg?seed=donor'}
+            alt="avatar"
+            className="w-8 h-8 rounded-full"
+          />
+          <div className="text-sm">
+            <p className="text-gray-900 font-medium">{item?.user?.name || 'Unknown'}</p>
+            <p className="text-gray-500 text-xs">⭐ {item?.user?.points || 0} pts</p>
           </div>
         </div>
       </div>

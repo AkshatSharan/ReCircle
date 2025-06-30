@@ -3,6 +3,8 @@ import Item from '../models/Item.js';
 import User from '../models/User.js';
 import uploadOnCloudiary from '../utils/cloudinary.js';
 
+
+
 export const addItem = async (req, res) => {
   try {
     console.log('=== ADD ITEM REQUEST ===');
@@ -80,14 +82,38 @@ export const getUserItems = async (req, res) => {
 };
 
 // Get all items with user details
+// controllers/itemController.js
 export const getAllItems = async (req, res) => {
   try {
-    const items = await Item.find({ status: 'available' })
-      .populate('addedBy', 'name email')
-      .sort({ createdAt: -1 });
+    const { excludeUser } = req.query;
 
-    res.json({ items });
+    const filter = { status: 'available' };
+
+    if (excludeUser) {
+      const user = await User.findOne({ uid: excludeUser }).select('_id');
+
+      if (!user) {
+        console.warn('No matching user found for excludeUser:', excludeUser);
+        // ✅ Proceed without filtering
+      } else {
+        filter.addedBy = { $ne: user._id };
+      }
+    }
+
+    const items = await Item.find(filter)
+      .populate('addedBy', 'name avatar points')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const formattedItems = items.map(item => ({
+      ...item,
+      user: item.addedBy,
+    }));
+
+    res.json({ items: formattedItems });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('❌ Get all items error:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 };
+

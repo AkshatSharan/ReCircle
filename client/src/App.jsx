@@ -11,9 +11,6 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import DashboardPage from './pages/DashboardPage';
-import ReuseMatchingPage from './pages/ReuseMatchingPage';
-import RecycleScannerPage from './pages/RecycleScannerPage';
-import LeaderboardPage from './pages/LeaderboardPage';
 import ChatbotPage from './pages/ChatbotPage';
 import AddItemPage from './pages/AddItemPage';
 import OSMMap from './components/OSMMap';
@@ -44,27 +41,6 @@ function AppRoutes() {
           element={
           <ProtectedRoute>
             <DashboardPage />
-            </ProtectedRoute>
-          } />
-          <Route 
-          path="/reuse" 
-          element={
-          <ProtectedRoute>
-            <ReuseMatchingPage />
-            </ProtectedRoute>
-          } />
-          <Route 
-          path="/scanner" 
-          element={
-          <ProtectedRoute>
-            <RecycleScannerPage />
-            </ProtectedRoute>
-          } />
-          <Route 
-          path="/leaderboard" 
-          element={
-          <ProtectedRoute>
-            <LeaderboardPage />
             </ProtectedRoute>
           } />
           <Route 

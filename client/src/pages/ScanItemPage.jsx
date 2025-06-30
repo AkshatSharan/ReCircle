@@ -3,10 +3,15 @@ import Webcam from 'react-webcam';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+
+
 
 const videoConstraints = { facingMode: 'environment' };
 
 const ScanItemPage = () => {
+  const navigate = useNavigate();
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [model, setModel] = useState(null);
@@ -103,6 +108,18 @@ ${items}`;
   };
 
   return (
+    <>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="scanner"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -30 }}
+        transition={{ duration: 0.5 }}
+        className="min-h-screen bg-white py-10 px-4"
+      >
+
+
     <div className="min-h-screen bg-white py-10 px-4">
       <h1 className="text-3xl font-bold text-center text-green-800 mb-6">♻️ Smart Recycle Scanner</h1>
 
@@ -192,6 +209,9 @@ ${items}`;
         </div>
       </div>
     </div>
+    </motion.div>
+    </AnimatePresence>
+    </>
   );
 };
 
