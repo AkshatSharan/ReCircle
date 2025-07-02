@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
   },
+  bio: {
+    type: String,
+    default: '',
+    trim: true,
+  },
   points: {
     type: Number,
     default: 30,
@@ -38,6 +43,12 @@ const userSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId, // Reference to Item documents
       ref: 'Item' // Reference to the Item model
+    },
+  ],
+  likedItems: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Item'
     },
   ],
 }, {

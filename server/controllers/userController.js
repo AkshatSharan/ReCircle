@@ -73,69 +73,68 @@ export const uploadUserAvatar = async (req, res) => {
     res.status(500).json({ error: 'Avatar upload failed' });
   }
 };
-export const getUserItems = async (req, res) => {
-  try {
-    const { uid } = req.params;
-
-    const items = await Item.find({ owner: uid });
-
-    res.status(200).json({ items });
-  } catch (err) {
-    console.error('Error fetching user items:', err);
-    res.status(500).json({ error: 'Server error' });
-  }
-};
 
 // ✅ Get User by UID
 export const getUserByUid = async (req, res) => {
   try {
     const { uid } = req.params;
+
     const user = await User.findOne({ uid });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.status(200).json({ user });
+    const higherRankedCount = await User.countDocuments({
+      $or: [
+        { points: { $gt: user.points } },
+        {
+          points: user.points,
+          createdAt: { $lt: user.createdAt }
+        }
+      ]
+    });
+
+    const userRank = higherRankedCount + 1;
+
+    res.status(200).json({
+      user: {
+        ...user.toObject(),
+        rank: userRank
+      }
+    });
   } catch (err) {
     console.error('Error fetching user:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-//rank 
-
-export const getUserRank = async (req, res) => {
+export const updateUserProfile = async (req, res) => {
   try {
     const { uid } = req.params;
+    const { name, email, bio, location } = req.body;
 
-    const users = await User.find().sort([
-      ['points', -1],       // Sort by highest points
-      ['createdAt', 1]      // If tie, earlier user wins
-    ]);
+    const user = await User.findOneAndUpdate(
+      { uid },
+      {
+        name: name?.trim(),
+        email: email?.trim(),
+        bio: bio?.trim() || '',
+        location: location?.trim() || ''
+      },
+      { new: true, runValidators: true }
+    );
 
-    const rank = users.findIndex(user => user.uid === uid);
-
-    if (rank === -1) {
-      return res.status(404).json({ error: 'User not found for ranking' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ rank: rank + 1 }); // rank is 0-indexed
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-
-export const getUserAchievements = async (req, res) => {
-  try {
-    const { uid } = req.params;
-    const user = await User.findOne({ uid });
-
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    res.json({ achievements: user.achievements });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error updating profile:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 };

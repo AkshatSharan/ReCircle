@@ -26,6 +26,12 @@ const itemSchema = new mongoose.Schema({
     enum: ['available', 'claimed', 'donated'],
     default: 'available',
   },
+  likedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+  ],
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically
 });

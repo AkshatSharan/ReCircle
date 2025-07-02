@@ -1,44 +1,41 @@
-// 📁 /client/pages/SwipePage.jsx
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import axios from 'axios';
 import TinderCard from 'react-tinder-card';
 import SwipeCard from '../components/SwipeCard';
 import SwipeActions from '../components/SwipeActions';
 import SwipeStats from '../components/SwipeStats';
 import { ArrowLeft, Sparkles } from 'lucide-react';
-import { getAuth } from 'firebase/auth'; // Firebase Auth
+import { useAuth } from '../contexts/AuthContext';
+import { toggleLikeItem, getAllItems } from '../api/apiCalls'; // ✅ Import getAllItems
 
 const SwipePage = () => {
   const [items, setItems] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeActions, setSwipeActions] = useState([]);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState(null); // ✅
+
+  const { currentUser } = useAuth();
 
   const currentIndexRef = useRef(currentIndex);
   const childRefs = useMemo(
     () => Array(items.length).fill(0).map(() => React.createRef()),
     [items.length]
   );
-
   useEffect(() => {
-    // ✅ Get current user ID from Firebase
-    const auth = getAuth();
-    const user = auth.currentUser;
-    setCurrentUserId(user?.uid || null);
-
-    // Fetch items from backend
     const fetchItems = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/items');
+        // ✅ Use the correct API call function
+        const res = await getAllItems(currentUser.uid);
         setItems(res.data.items);
         setCurrentIndex(res.data.items.length - 1);
       } catch (error) {
         console.error('Error fetching items:', error);
       }
     };
-    fetchItems();
-  }, []);
+
+    if (currentUser?.uid) {
+      fetchItems();
+    }
+  }, [currentUser]);
 
   const updateCurrentIndex = (val) => {
     setCurrentIndex(val);
@@ -48,31 +45,46 @@ const SwipePage = () => {
   const canGoBack = currentIndex < items.length - 1;
   const canSwipe = currentIndex >= 0;
 
-  // 🔔 Send like notification to backend
-const handleRightSwipe = async (itemId) => {
-  try {
-    const auth = getAuth(); // in case it's needed
-    const user = auth.currentUser;
-    const token = await user.getIdToken();
+  // ✅ Handle like when swiping right
+  const handleLikeItem = async (itemId) => {
+    if (!currentUser?.uid) return;
 
-    await axios.post(`http://localhost:5000/api/items/${itemId}/like`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      await toggleLikeItem(itemId, currentUser.uid);
+      console.log('✅ Item liked successfully');
 
-    console.log('✅ Like notification sent');
-  } catch (error) {
-    console.error('❌ Swipe like failed:', error);
-  }
-};
+      // Update the item in local state to reflect the like
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item._id === itemId
+            ? {
+              ...item,
+              likedBy: [...(item.likedBy || []), currentUser._id],
+              likesCount: (item.likesCount || 0) + 1
+            }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error('❌ Failed to like item:', error);
+    }
+  };
 
+  const swiped = async (direction, item, index) => {
+    // ✅ Handle like when swiping right
+    if (direction === 'right') {
+      await handleLikeItem(item._id);
+    }
 
-  const swiped = (direction, item, index) => {
     setSwipeActions((prev) => [
       ...prev,
-      { itemId: item._id, action: direction === 'right' ? 'like' : 'dislike', timestamp: new Date().toISOString() }
+      {
+        itemId: item._id,
+        action: direction === 'right' ? 'like' : 'dislike',
+        timestamp: new Date().toISOString()
+      }
     ]);
+
     updateCurrentIndex(index - 1);
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
@@ -92,10 +104,54 @@ const handleRightSwipe = async (itemId) => {
 
   const goBack = async () => {
     if (!canGoBack || isAnimating) return;
+
     const newIndex = currentIndex + 1;
+    const lastAction = swipeActions[swipeActions.length - 1];
+
+    // ✅ If the last action was a like, remove it
+    if (lastAction && lastAction.action === 'like') {
+      try {
+        await toggleLikeItem(lastAction.itemId, currentUser.uid); // This will unlike
+
+        // Update local state to remove the like
+        setItems(prevItems =>
+          prevItems.map(item =>
+            item._id === lastAction.itemId
+              ? {
+                ...item,
+                likedBy: (item.likedBy || []).filter(id => id !== currentUser._id),
+                likesCount: Math.max(0, (item.likesCount || 1) - 1)
+              }
+              : item
+          )
+        );
+      } catch (error) {
+        console.error('❌ Failed to unlike item:', error);
+      }
+    }
+
     updateCurrentIndex(newIndex);
     await childRefs[newIndex].current.restoreCard();
     setSwipeActions((prev) => prev.slice(0, -1));
+  };
+
+  // ✅ Handle like toggle from SwipeCard component
+  const handleLikeToggle = async (itemId, liked) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item._id === itemId
+          ? {
+            ...item,
+            likedBy: liked
+              ? [...(item.likedBy || []), currentUser._id]
+              : (item.likedBy || []).filter(id => id !== currentUser._id),
+            likesCount: liked
+              ? (item.likesCount || 0) + 1
+              : Math.max(0, (item.likesCount || 1) - 1)
+          }
+          : item
+      )
+    );
   };
 
   const stats = {
@@ -121,7 +177,7 @@ const handleRightSwipe = async (itemId) => {
 
         <SwipeStats {...stats} />
 
-        <div className="relative h-[480px] mb-4">
+        <div className="relative h-[480px] mb-4 overflow-hidden">
           {items.map((item, index) => (
             <TinderCard
               ref={childRefs[index]}
@@ -133,7 +189,8 @@ const handleRightSwipe = async (itemId) => {
             >
               <SwipeCard
                 item={item}
-                currentUserId={currentUserId} // ✅ Pass here
+                currentUser={currentUser}
+                onLikeToggle={handleLikeToggle}
                 className="w-full h-full cursor-grab active:cursor-grabbing"
                 style={{
                   zIndex: items.length - index,

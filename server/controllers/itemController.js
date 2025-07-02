@@ -90,13 +90,19 @@ export const getAllItems = async (req, res) => {
     const filter = { status: 'available' };
 
     if (excludeUser) {
-      const user = await User.findOne({ uid: excludeUser }).select('_id');
+      const user = await User.findOne({ uid: excludeUser }).select('_id likedItems');
 
       if (!user) {
         console.warn('No matching user found for excludeUser:', excludeUser);
         // ✅ Proceed without filtering
       } else {
+        // Exclude items added by the user
         filter.addedBy = { $ne: user._id };
+
+        // Exclude items liked by the user
+        if (user.likedItems && user.likedItems.length > 0) {
+          filter._id = { $nin: user.likedItems };
+        }
       }
     }
 
@@ -117,3 +123,54 @@ export const getAllItems = async (req, res) => {
   }
 };
 
+export const toggleLikeItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { uid } = req.body;
+
+    // Find user and item
+    const user = await User.findOne({ uid });
+    const item = await Item.findById(itemId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!item) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+
+    // Check if user already liked this item
+    const userLikedIndex = user.likedItems.indexOf(itemId);
+    const itemLikedIndex = item.likedBy.indexOf(user._id);
+
+    if (userLikedIndex > -1) {
+      // Unlike: Remove from both arrays
+      user.likedItems.splice(userLikedIndex, 1);
+      item.likedBy.splice(itemLikedIndex, 1);
+
+      await Promise.all([user.save(), item.save()]);
+
+      res.status(200).json({
+        message: 'Item unliked successfully',
+        liked: false,
+        likesCount: item.likedBy.length
+      });
+    } else {
+      // Like: Add to both arrays
+      user.likedItems.push(itemId);
+      item.likedBy.push(user._id);
+
+      await Promise.all([user.save(), item.save()]);
+
+      res.status(200).json({
+        message: 'Item liked successfully',
+        liked: true,
+        likesCount: item.likedBy.length
+      });
+    }
+  } catch (err) {
+    console.error('Error toggling like:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
