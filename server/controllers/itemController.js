@@ -157,9 +157,24 @@ export const toggleLikeItem = async (req, res) => {
         likesCount: item.likedBy.length
       });
     } else {
-      // Like: Add to both arrays
+      // ✅ Like: Add to both arrays
       user.likedItems.push(itemId);
       item.likedBy.push(user._id);
+
+      // ✅ Notify item owner (if not liking own item)
+      if (String(item.addedBy) !== String(user._id)) {
+        const itemOwner = await User.findById(item.addedBy);
+        if (itemOwner) {
+          itemOwner.notifications = itemOwner.notifications || [];
+          itemOwner.notifications.push({
+            type: 'like',
+            from: user._id,
+            item: item._id,
+            message: `${user.name} liked your item "${item.title}"`,
+          });
+          await itemOwner.save(); // Save owner with the new notification
+        }
+      }
 
       await Promise.all([user.save(), item.save()]);
 

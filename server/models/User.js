@@ -51,6 +51,33 @@ const userSchema = new mongoose.Schema({
       ref: 'Item'
     },
   ],
+
+  notifications: [
+  {
+    type: {
+      type: String,
+      enum: ['like', 'match', 'message'],
+    },
+    from: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    item: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Item',
+    },
+    message: String,
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    read: {
+      type: Boolean,
+      default: false,
+    },
+  }
+],
+
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically
 });

@@ -22,13 +22,13 @@ function AppRoutes() {
     <Router>
       <Layout>
         <Routes>
-          {/* Public Routes */}
+          {/* public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/add-item" element={<AddItemPage />} />
 
-          {/* Protected Routes */}
+          {/* protected routes */}
           <Route 
           path="/profile" 
           element={

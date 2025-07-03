@@ -138,3 +138,31 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const getUserNotifications = async (req, res) => {
+  try {
+    const user = await User.findOne({ uid: req.params.uid })
+      .populate('notifications.from', 'name avatar')
+      .populate('notifications.item', 'title');
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({ notifications: user.notifications.reverse() }); // newest first
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const markNotificationsRead = async (req, res) => {
+  try {
+    const user = await User.findOne({ uid: req.params.uid });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.notifications.forEach(n => (n.read = true));
+    await user.save();
+
+    res.json({ message: 'All notifications marked as read' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
