@@ -1,4 +1,3 @@
-// components/ui/Layout.jsx
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,7 +7,8 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
-  const isMapPage = location.pathname === '/map';
+  const isLoginPage = location.pathname === '/login';
+  const isRegisterPage = location.pathname === '/register';
   const [showChat, setShowChat] = useState(false);
   const { logout } = useAuth();
 
@@ -23,18 +23,18 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation - only show when not on home page */}
-      {!isHomePage && <Navigation />}
+      {/* Navigation - only show when not on home, login, or register */}
+      {!isHomePage && !isLoginPage && !isRegisterPage && <Navigation />}
 
       {/* Page content with proper spacing - special handling for map */}
-      <main className={`${!isHomePage
-          ? isMapPage
-            ? 'pb-20 md:pb-0 md:ml-20' // No horizontal padding for map
+      <main className={`${!isHomePage && !isLoginPage && !isRegisterPage
+          ? location.pathname === '/map'
+            ? 'pb-20 md:pb-0 md:ml-20'
             : 'pb-20 md:pb-6 md:ml-20 px-4 md:px-6'
           : 'px-4 md:px-6'
         }`}>
         {/* Container wrapper - only for non-map pages */}
-        {isMapPage ? (
+        {location.pathname === '/map' ? (
           children
         ) : (
           <div className="max-w-7xl mx-auto">
@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
       </main>
 
       {/* Chatbot modal - responsive */}
-      {showChat && !isHomePage && (
+      {showChat && !isHomePage && !isLoginPage && !isRegisterPage && (
         <div className="fixed bottom-28 right-4 md:bottom-20 md:right-6 w-[calc(100vw-2rem)] max-w-[350px] h-[60vh] max-h-[500px] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 flex flex-col overflow-hidden">
           <div className="bg-green-600 text-white px-4 py-3 flex items-center justify-between">
             <span className="font-semibold">EcoBot</span>
