@@ -36,12 +36,7 @@ function AppRoutes() {
               <RegisterPage />
             </PublicRoute>
           } />
-          <Route path="/add-item" element={
-            <PublicRoute>
-              <AddItemPage />
-            </PublicRoute>
-          } />
-
+         
           {/* protected routes */}
           <Route
             path="/profile"
@@ -59,6 +54,11 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+          <Route path="/add-item" element={
+          <ProtectedRoute>
+              <AddItemPage />
+          </ProtectedRoute>
+            } />
           <Route
             path="/map"
             element={

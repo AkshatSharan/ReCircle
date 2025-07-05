@@ -248,17 +248,86 @@ const DashboardPage = () => {
               <p className="text-2xl font-bold text-green-600">{sharedItems.length}</p>
               <p className="text-sm text-gray-600">Items Shared</p>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-purple-600">7</p>
-              <p className="text-sm text-gray-600">Matches Made</p>
+           <div className="text-center">
+           <p className="text-2xl font-bold text-purple-600">{userData?.likedItems?.length || 0}</p>
+           <p className="text-sm text-gray-600">Items Liked</p>
             </div>
+
           </div>
         </Card>
       </div>
 
-      {/* Your existing modals remain the same */}
+       <Modal isOpen={showAllAchievements} onClose={() => setShowAllAchievements(false)}>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">All Achievements</h2>
+        {achievements.length === 0 ? (
+          <p className="text-sm text-gray-500">No achievements to show.</p>
+        ) : (
+          <ul className="space-y-3 max-h-80 overflow-y-auto">
+            {achievements.map((achievement, index) => (
+              <li key={index} className="flex items-start justify-between">
+                <div className="flex items-start space-x-3 flex-1">
+                  <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+                    <Award size={16} className="text-green-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">{achievement.title}</p>
+                    <p className="text-xs text-gray-500">{achievement.description}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-green-700 ml-2">+{achievement.points}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Modal>
+
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Enter your location</h2>
+            <input
+              type="text"
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
+              placeholder="e.g. Ranchi, Jharkhand"
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg mb-4 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                onClick={() => setShowLocationModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                onClick={() => {
+                  if (locationInput.trim()) {
+                    navigate(`/map?location=${encodeURIComponent(locationInput)}`);
+                    setShowLocationModal(false);
+                  }
+                }}
+              >
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default DashboardPage;
+
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+        <button className="absolute top-2 right-3 text-gray-500 hover:text-red-500" onClick={onClose}>×</button>
+        {children}
+      </div>
+    </div>
+  );
+};
