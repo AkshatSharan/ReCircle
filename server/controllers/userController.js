@@ -141,28 +141,49 @@ export const updateUserProfile = async (req, res) => {
 
 export const getUserNotifications = async (req, res) => {
   try {
-    const user = await User.findOne({ uid: req.params.uid })
-      .populate('notifications.from', 'name avatar')
-      .populate('notifications.item', 'title');
+    const { uid } = req.params;
+    const user = await User.findOne({ uid }).select('notifications');
 
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.json({ notifications: user.notifications.reverse() }); // newest first
+    // Sort notifications by newest first
+    const unreadNotifications = user.notifications
+      .filter(notification => !notification.read)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.status(200).json({
+      notifications: unreadNotifications
+    });
   } catch (err) {
+    console.error('Error fetching notifications:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
 
+// ✅ Mark all notifications as read
 export const markNotificationsRead = async (req, res) => {
   try {
-    const user = await User.findOne({ uid: req.params.uid });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const { uid } = req.params;
 
-    user.notifications.forEach(n => (n.read = true));
+    const user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Mark all notifications as read
+    user.notifications.forEach(notification => {
+      notification.read = true;
+    });
+
     await user.save();
 
-    res.json({ message: 'All notifications marked as read' });
+    res.status(200).json({
+      message: 'All notifications marked as read'
+    });
   } catch (err) {
+    console.error('Error marking notifications as read:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };

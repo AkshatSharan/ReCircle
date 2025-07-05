@@ -53,31 +53,38 @@ const userSchema = new mongoose.Schema({
   ],
 
   notifications: [
-  {
-    type: {
-      type: String,
-      enum: ['like', 'match', 'message'],
-    },
-    from: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    item: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Item',
-    },
-    message: String,
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    read: {
-      type: Boolean,
-      default: false,
-    },
-  }
-],
-
+    {
+      type: {
+        type: String,
+        enum: ['like', 'comment', 'system'],
+        default: 'like'
+      },
+      itemName: {
+        type: String,
+        required: true
+      },
+      likedBy: {
+        type: String,
+        required: true
+      },
+      contact: {
+        type: String,
+        required: true
+      },
+      message: {
+        type: String,
+        required: true
+      },
+      read: {
+        type: Boolean,
+        default: false
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically
 });

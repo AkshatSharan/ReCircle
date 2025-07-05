@@ -20,7 +20,6 @@ router.get('/:uid', getUserByUid);
 router.put('/update/:uid', updateUserProfile);
 
 router.get('/:uid/notifications', getUserNotifications);
-
 router.put('/:uid/notifications/read', markNotificationsRead);
 
 

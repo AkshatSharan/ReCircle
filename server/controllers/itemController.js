@@ -130,7 +130,7 @@ export const toggleLikeItem = async (req, res) => {
 
     // Find user and item
     const user = await User.findOne({ uid });
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId).populate('addedBy', 'name email uid');
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -161,18 +161,25 @@ export const toggleLikeItem = async (req, res) => {
       user.likedItems.push(itemId);
       item.likedBy.push(user._id);
 
-      // ✅ Notify item owner (if not liking own item)
-      if (String(item.addedBy) !== String(user._id)) {
-        const itemOwner = await User.findById(item.addedBy);
+      // ✅ Create notification for item owner (if not liking own item)
+      if (String(item.addedBy._id) !== String(user._id)) {
+        const itemOwner = await User.findById(item.addedBy._id);
         if (itemOwner) {
+          const notificationMessage = `${user.name} has liked your item ${item.title}\nContact: ${user.email}`;
+
+          // Add notification to owner's notifications array
           itemOwner.notifications = itemOwner.notifications || [];
           itemOwner.notifications.push({
             type: 'like',
-            from: user._id,
-            item: item._id,
-            message: `${user.name} liked your item "${item.title}"`,
+            itemName: item.title,
+            likedBy: user.name,
+            contact: user.email,
+            message: notificationMessage,
+            read: false
           });
-          await itemOwner.save(); // Save owner with the new notification
+
+          await itemOwner.save();
+          console.log(`✅ Notification sent to ${itemOwner.name} for item: ${item.title}`);
         }
       }
 
