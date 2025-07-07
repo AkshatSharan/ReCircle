@@ -13,8 +13,6 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    location: '',
-    agreeToTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -29,13 +27,11 @@ const RegisterPage = () => {
     setErrors({});
 
     const newErrors = {};
-    if (!formData.name) newErrors.name = 'First name is required';
+    if (!formData.name) newErrors.name = 'Name is required';
     if (!formData.email) newErrors.email = 'Email is required';
     if (!formData.password) newErrors.password = 'Password is required';
     if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (!formData.location) newErrors.location = 'Location is required';
-    if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the terms';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -44,14 +40,9 @@ const RegisterPage = () => {
     }
 
     try {
-      // firebase signup
       await signup(formData.email, formData.password);
       await updateUserProfile(`${formData.name}`);
 
-      // Store additional user data in localStorage or Firestore
-      localStorage.setItem('userLocation', formData.location);
-
-      // transfer the data to mongodb
       const auth = getAuth();
       const currentUser = auth.currentUser;
       const uid = currentUser.uid;
@@ -113,7 +104,7 @@ const RegisterPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                First Name
+                Name
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -124,7 +115,7 @@ const RegisterPage = () => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
                     }`}
-                  placeholder="First name"
+                  placeholder="Enter your name"
                 />
               </div>
               {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -147,25 +138,6 @@ const RegisterPage = () => {
                 />
               </div>
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-                Location
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.location ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="City, State"
-                />
-              </div>
-              {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
             </div>
 
             <div>
@@ -218,28 +190,6 @@ const RegisterPage = () => {
                 </button>
               </div>
               {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-            </div>
-
-            <div>
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  checked={formData.agreeToTerms}
-                  onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="rounded border-gray-300 text-green-600 focus:ring-green-500 mt-1"
-                />
-                <span className="ml-2 text-sm text-gray-600">
-                  I agree to the{' '}
-                  <Link to="/terms" className="text-green-600 hover:text-green-700">
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link to="/privacy" className="text-green-600 hover:text-green-700">
-                    Privacy Policy
-                  </Link>
-                </span>
-              </label>
-              {errors.agreeToTerms && <p className="text-red-500 text-sm mt-1">{errors.agreeToTerms}</p>}
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full" size="lg">
