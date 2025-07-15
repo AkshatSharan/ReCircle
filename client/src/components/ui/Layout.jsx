@@ -12,15 +12,6 @@ const Layout = ({ children }) => {
   const [showChat, setShowChat] = useState(false);
   const { logout } = useAuth();
 
-  const handleSignOut = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (err) {
-      console.error('Logout failed:', err);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation - only show when not on home, login, or register */}
@@ -28,16 +19,16 @@ const Layout = ({ children }) => {
 
       {/* Page content with proper spacing - special handling for map */}
       <main className={`${!isHomePage && !isLoginPage && !isRegisterPage
-          ? location.pathname === '/map'
+          ? location.pathname === '/map' || location.pathname === '/swipe'
             ? 'pb-20 md:pb-0 md:ml-20'
             : 'pb-20 md:pb-6 md:ml-20 px-4 md:px-6'
-          : 'px-4 md:px-6'
+          : ''
         }`}>
         {/* Container wrapper - only for non-map pages */}
         {location.pathname === '/map' ? (
           children
         ) : (
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-[100vw]">
             {children}
           </div>
         )}

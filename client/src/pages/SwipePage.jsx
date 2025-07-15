@@ -140,7 +140,7 @@ const SwipePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-pink-100">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-pink-100 overflow-hidden">
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6 backdrop-blur-md bg-white/70 rounded-xl p-3 shadow-md">

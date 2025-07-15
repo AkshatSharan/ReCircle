@@ -190,7 +190,7 @@ const DashboardPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <div className="lg:col-span-2">
-          <GreenScoreCard score={userData?.points || 0} monthlyChange={150} rank={userRank || '-'} />
+          <GreenScoreCard score={userData?.points || 0} monthlyChange={150} rank={userRank || '-'} userData={userData} />
         </div>
         <Card className="p-4">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>

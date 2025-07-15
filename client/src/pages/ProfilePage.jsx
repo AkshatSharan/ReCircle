@@ -29,7 +29,6 @@ const ProfilePage = () => {
         setProfileData({
           name: data.user.name,
           email: data.user.email,
-          location: data.user.location || '',
           bio: data.user.bio || '',
         });
         setAchievements(data.user.achievements || []);
@@ -91,7 +90,6 @@ const ProfilePage = () => {
       setProfileData({
         name: userData.name,
         email: userData.email,
-        location: userData.location || '',
         bio: userData.bio || '',
       });
     }
@@ -196,19 +194,6 @@ const ProfilePage = () => {
                           placeholder="Enter your email address"
                         />
                       </div>
-                      <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                          <MapPin size={16} className="mr-2" />
-                          Location
-                        </label>
-                        <input
-                          type="text"
-                          value={profileData.location}
-                          onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder="Enter your city or location"
-                        />
-                      </div>
                     </div>
                   ) : (
                     <>
@@ -218,12 +203,6 @@ const ProfilePage = () => {
                           <Mail size={16} className="mr-2 text-gray-400" />
                           {profileData.email}
                         </div>
-                        {profileData.location && (
-                          <div className="flex items-center">
-                            <MapPin size={16} className="mr-2 text-gray-400" />
-                            {profileData.location}
-                          </div>
-                        )}
                         <div className="flex items-center">
                           <Calendar size={16} className="mr-2 text-gray-400" />
                           Joined {new Date(userData.createdAt).toLocaleDateString()}

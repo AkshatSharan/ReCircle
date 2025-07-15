@@ -143,7 +143,7 @@ export default function HomePage() {
             a cleaner, greener future.
           </p>
           <Link to="/register">
-            <Button variant="secondary" size="lg" className="bg-white text-green-600 hover:bg-gray-100 px-8">
+            <Button variant="secondary" size="lg" className="bg-gray-100 text-green-600 hover:bg-gray-100 px-8">
               Join ReCircle Now
             </Button>
           </Link>
